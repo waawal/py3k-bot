@@ -90,6 +90,7 @@ def check_for_updates():
     updates = client.changelog(int(time() - QUERY_INTERVAL))
     # Returns a list of ['vimeo', '0.1.2', 1344087619,
     #                    'update description, _pypi_hidden, classifiers']
+    
     if updates: print updates # Log to heroku.
 
     for module in updates:
@@ -128,5 +129,7 @@ def get_supported(classifiers):
 if __name__ == '__main__':
     supported = get_supported(CLASSIFIERS)
     while True:
+        begin = time()
         check_for_updates()
-        sleep(QUERY_INTERVAL)
+        end = time()
+        sleep(QUERY_INTERVAL - (end - begin)) # Consider processing time.
