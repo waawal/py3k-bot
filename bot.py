@@ -70,7 +70,7 @@ def post_to_twitter(projectname, meta, msgtype):
     chrcount += 7
 
     # Building the summary.
-    chrcount += (len(" ".join(message)) + 1) # 1 = the space before the summary.
+    chrcount += (len(message) + 1) # 1 = the space before the summary.
     chrsleft = 140 - chrcount
     
     if len(meta['summary']) > chrsleft:
@@ -102,6 +102,7 @@ def check_for_updates():
                 supported.add(name)
                 post_to_twitter(name, meta, 'new')
 
+    for module in updates: # Must iterate two times, updates can come after new.
         if 'new release' in module[3] or 'classifiers' in module[3]:
             name, version = module[:2]
             
