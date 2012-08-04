@@ -90,7 +90,7 @@ def check_for_updates():
     updates = client.changelog(int(time() - QUERY_INTERVAL))
     # Returns a list of ['vimeo', '0.1.2', 1344087619,
     #                    'update description, _pypi_hidden, classifiers']
-    print updates # Log to heroku.
+    if updates: print updates # Log to heroku.
 
     for module in updates:
         if 'create' in module[3]:
@@ -103,10 +103,12 @@ def check_for_updates():
 
         if 'new release' in module[3] or 'classifiers' in module[3]:
             name, version = module[:2]
-            meta = get_meta(name)
-            if CLASSIFIERS.intersection(meta['classifiers']):
-                supported.add(name)
-                post_to_twitter(name, meta, 'update')
+            
+            if name not in supported:
+                meta = get_meta(name)
+                if CLASSIFIERS.intersection(meta['classifiers']):
+                    supported.add(name)
+                    post_to_twitter(name, meta, 'update')
 
 
 def get_supported(classifiers):
