@@ -96,8 +96,10 @@ def check_for_updates():
     for module in updates:
         if 'create' in module[3]:
             name, version = module[:2]
-            
-            meta = get_meta(name)
+            try:
+                meta = get_meta(name)
+            except TypeError:
+                meta = {}
             if CLASSIFIERS.intersection(meta['classifiers']):
                 supported.add(name)
                 post_to_twitter(name, meta, 'new')
@@ -107,7 +109,10 @@ def check_for_updates():
             name, version = module[:2]
             
             if name not in supported:
-                meta = get_meta(name)
+                try:
+                    meta = get_meta(name)
+                except TypeError:
+                    meta = {}
                 if CLASSIFIERS.intersection(meta['classifiers']):
                     supported.add(name)
                     post_to_twitter(name, meta, 'update')
