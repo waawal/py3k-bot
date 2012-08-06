@@ -74,10 +74,11 @@ def post_to_twitter(projectname, meta, msgtype):
     chrcount += (len(message) + 1) # 1 = the space before the summary.
     chrsleft = 140 - chrcount
     
-    if len(meta['summary']) > chrsleft:
-        message.insert(2, "".join((meta['summary'][:(chrsleft-3)], '...')))
-    else:
-        message.insert(2, meta['summary'])
+    if meta.get('summary'):
+        if len(meta['summary']) > chrsleft:
+            message.insert(2, "".join((meta['summary'][:(chrsleft-3)], '...')))
+        else:
+            message.insert(2, meta['summary'])
     finalmessage = " ".join(message)
 
     # All done!
