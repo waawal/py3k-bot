@@ -93,8 +93,8 @@ def check_for_updates():
     if updates: print updates # Log to heroku.
 
     for module in updates:
-        if 'create' in module[3]:
-            name, version = module[:2]
+        name, version, timestamp, action = module
+        if 'create' in action:
             try:
                 meta = get_meta(name)
             except TypeError:
@@ -104,9 +104,8 @@ def check_for_updates():
                 post_to_twitter(name, meta, 'new')
 
     for module in updates: # Must iterate 2 times, updates can come before new.
-        if 'new release' in module[3] or 'classifiers' in module[3]:
-            name, version = module[:2]
-            
+        name, version, timestamp, action = module
+        if 'new release' in action or 'classifiers' in action:
             if name not in supported:
                 try:
                     meta = get_meta(name)
