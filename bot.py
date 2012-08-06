@@ -45,12 +45,12 @@ def post_to_twitter(projectname, meta, msgtype):
     chrcount = 0
     message = []
 
-    message.append(projectname)
-    chrcount += len(projectname)
-
     msgtype = '[{0}]'.format(msgtype.upper())
     message.append(msgtype)
     chrcount += len(msgtype)
+
+    message.append(projectname)
+    chrcount += len(projectname)
 
     message.append('pypi:')
     chrcount += len('pypi:')
