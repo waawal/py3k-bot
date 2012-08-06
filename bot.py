@@ -20,7 +20,9 @@ CLASSIFIERS = frozenset(("Programming Language :: Python :: 3",
                          "Programming Language :: Python :: 3.0",
                          "Programming Language :: Python :: 3.1",
                          "Programming Language :: Python :: 3.2",
-                         "Programming Language :: Python :: 3.3"))
+                         "Programming Language :: Python :: 3.3"
+                         )
+                        )
 
 twitter = Twitter(auth=OAuth(os.environ['OAUTH_TOKEN'],
                              os.environ['OAUTH_SECRET'],
@@ -138,3 +140,4 @@ if __name__ == '__main__':
         check_for_updates()
         endprocessing = time()
         sleep(QUERY_INTERVAL - (endprocessing - beginprocessing)) # Consider processing time.
+
