@@ -93,25 +93,26 @@ def check_for_updates():
     if updates: print updates # Log to heroku.
 
     for module in updates:
-        name, version, timestamp, action = module
-        if 'create' in action:
+        name, version, timestamp, actions = module
+        if 'create' in actions:
+            sleep(3) # Sleep 3 secs awaiting json-representation.
             try:
                 meta = get_meta(name)
             except TypeError:
                 meta = {}
-            if CLASSIFIERS.intersection(meta['classifiers']):
+            if CLASSIFIERS.intersection(meta.get('classifiers')):
                 supported.add(name)
                 post_to_twitter(name, meta, 'new')
 
     for module in updates: # Must iterate 2 times, updates can come before new.
-        name, version, timestamp, action = module
-        if 'new release' in action or 'classifiers' in action:
+        name, version, timestamp, actions = module
+        if 'new release' in actions or 'classifiers' in actions:
             if name not in supported:
                 try:
                     meta = get_meta(name)
                 except TypeError:
                     meta = {}
-                if CLASSIFIERS.intersection(meta['classifiers']):
+                if CLASSIFIERS.intersection(meta.get('classifiers')):
                     supported.add(name)
                     post_to_twitter(name, meta, 'update')
 
