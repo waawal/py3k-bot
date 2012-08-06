@@ -49,8 +49,8 @@ def post_to_twitter(projectname, meta, msgtype):
     message.append(msgtype)
     chrcount += len(msgtype)
 
-    message.append(projectname)
-    chrcount += len(projectname)
+    message.append(projectname + " -")
+    chrcount += len(projectname + " -")
 
     message.append('pypi:')
     chrcount += len('pypi:')
