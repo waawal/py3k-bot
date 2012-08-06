@@ -9,7 +9,6 @@ from time import time, sleep
 from datetime import datetime
 
 import requests
-import feedparser
 from twitter import OAuth, Twitter
 
 
@@ -36,7 +35,7 @@ def get_meta(project, timeout=TIMEOUT):
     """
     meta = requests.get('http://pypi.python.org/pypi/{0}/json'.format(project),
                         timeout=timeout)
-    return meta.json['info'] #print get_meta('greenbalance')['description']
+    return meta.json['info']
 
 def post_to_twitter(projectname, meta, msgtype):
     """ Composes a twitter-post and sends it on its way.
@@ -104,7 +103,7 @@ def check_for_updates():
                 supported.add(name)
                 post_to_twitter(name, meta, 'new')
 
-    for module in updates: # Must iterate two times, updates can come after new.
+    for module in updates: # Must iterate 2 times, updates can come before new.
         if 'new release' in module[3] or 'classifiers' in module[3]:
             name, version = module[:2]
             
@@ -135,7 +134,7 @@ def get_supported(classifiers):
 if __name__ == '__main__':
     supported = get_supported(CLASSIFIERS)
     while True:
-        begin = time()
+        beginprocessing = time()
         check_for_updates()
-        end = time()
-        sleep(QUERY_INTERVAL - (end - begin)) # Consider processing time.
+        endprocessing = time()
+        sleep(QUERY_INTERVAL - (endprocessing - beginprocessing)) # Consider processing time.
