@@ -86,7 +86,7 @@ def check_for_updates(supported, classifiers, interval, service):
     """
     startprocessing = time() # Let's do this!
     client = xmlrpclib.ServerProxy(service)
-    updates = client.changelog(startprocessing - interval)
+    updates = client.changelog(int(startprocessing - interval))
     # Returns a list of:
     #['vimeo', '0.1.2', 1344087619,'update description, classifiers']
     
@@ -128,7 +128,7 @@ def get_supported(classifiers, service):
 
 
 if __name__ == '__main__':
-    supported = get_supported(classifiers=CLASSIFIERS, service=PYPI_SERVICE)
+    supported = get_supported(CLASSIFIERS, PYPI_SERVICE)
     sleep(QUERY_INTERVAL)
     while True:
         processingtime = check_for_updates(supported=supported,
