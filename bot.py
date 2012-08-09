@@ -93,11 +93,11 @@ def post_to_twitter(projectname, meta, msgtype):
     # All done!
     twitter.statuses.update(status=finalmessage)
 
-def check_for_updates(supported, interval):
+def check_for_updates(supported, interval, service):
     """ Checks for new projects and updates.
     """
     startprocessing = time() # Let's do this!
-    client = xmlrpclib.ServerProxy(PYPI_SERVICE)
+    client = xmlrpclib.ServerProxy(service)
     updates = client.changelog(startprocessing - interval)
     # Returns a list of:
     #['vimeo', '0.1.2', 1344087619,'update description, classifiers']
@@ -133,13 +133,13 @@ def check_for_updates(supported, interval):
     processingtime = endprocessing - startprocessing
     return processingtime
 
-def get_supported(classifiers):
+def get_supported(classifiers, service):
     """ Builds a set of the PYPI-projects currently listed under the provided
         classifiers.
     """
-    client = xmlrpclib.ServerProxy(PYPI_SERVICE)
+    client = xmlrpclib.ServerProxy(service)
     multicall = xmlrpclib.MultiCall(client)
-    [multicall.browse([classifier]) for classifier in CLASSIFIERS]
+    [multicall.browse([classifier]) for classifier in classifiers]
     supported = set()
     for results in multicall():
         # Returns a list of ['projectname', 'version']
@@ -148,9 +148,12 @@ def get_supported(classifiers):
 
 
 if __name__ == '__main__':
-    supported = get_supported(CLASSIFIERS)
+    supported = get_supported(CLASSIFIERS, service=PYPI_SERVICE)
     sleep(QUERY_INTERVAL)
     while True:
-        processingtime = check_for_updates(supported, QUERY_INTERVAL)
+        processingtime = check_for_updates(supported=supported,
+                                           interval=QUERY_INTERVAL,
+                                           service=PYPI_SERVICE,
+                                           )
         sleep(QUERY_INTERVAL - processingtime) # Consider processing time.
 
