@@ -39,46 +39,50 @@ def get_meta(project, timeout=TIMEOUT):
                         timeout=timeout)
     return meta.json['info']
 
+def count_tweet(tweet):
+    """ Counts the characters within a tweet.
+    """
+    chars = len(tweet) # we initially append the future space-chars.
+    for part in tweet:
+        if part.startswith("http://"):
+            chars += 21 # t.co-urls are at most 21
+        else:
+            chars += len(part)
+    return chars
+
 def post_to_twitter(projectname, meta, msgtype):
     """ Composes a twitter-post and sends it on its way.
     """
-    chrcount = 0
     message = []
 
     msgtype = '[{0}]'.format(msgtype.upper())
     message.append(msgtype)
-    chrcount += len(msgtype)
 
     message.append(projectname + " -")
-    chrcount += len(projectname + " -")
 
     message.append('pypi:')
-    chrcount += len('pypi:')
     message.append('http://pypi.python.org/pypi/{0}/'.format(projectname))
-    chrcount += 21 # t.co-urls are at most 21
 
     # If a home-page is provided, lets use it, otherwise - fall back to crate.
     if meta.get('home_page') and not meta.get('home_page') == "UNKNOWN":
-        message.extend(('www:', meta['home_page']))
-        chrcount += (len('www:') + 21)
+        message.append('www:')
+        message.append(meta['home_page'])
     else:
-        message.extend(('crate.io:',
-                        'https://crate.io/packages/{0}/'.format(projectname)))
-        chrcount += (len('crate.io:') + 21)
+        message.append('crate.io:')
+        message.append('https://crate.io/packages/{0}/'.format(projectname))
 
     # Important, add #python
     message.append('#python')
-    chrcount += 7
 
     # Building the summary.
-    chrcount += (len(message) + 1) # 1 = the space before the summary.
-    chrsleft = 140 - chrcount
+    chrsleft = 140 - (count_tweet(message) + 1) # +1 = the space before summary.
     
     if meta.get('summary'):
         if len(meta['summary']) > chrsleft:
             message.insert(2, "".join((meta['summary'][:(chrsleft-3)], '...')))
         else:
             message.insert(2, meta['summary'])
+    
     finalmessage = " ".join(message)
 
     # All done!
