@@ -77,7 +77,7 @@ def post_to_twitter(projectname, meta, msgtype):
     # Building the summary.
     chrsleft = 140 - (count_tweet(message) + 1) # +1 = the space before summary.
     
-    if meta.get('summary'):
+    if meta.get('summary', 'UNKNOWN') != "UNKNOWN":
         if len(meta['summary']) > chrsleft:
             message.insert(2, "".join((meta['summary'][:(chrsleft-3)], '...')))
         else:
