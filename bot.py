@@ -13,7 +13,6 @@ from twitter import OAuth, Twitter
 
 QUERY_INTERVAL = 2 * 60 # In seconds, intervals between queries to PYPI, 2 min.
 PYPI_SERVICE = 'http://pypi.python.org/pypi'
-TIMEOUT = 5 # In seconds.
 
 CLASSIFIERS = frozenset(("Programming Language :: Python :: 3",
                          "Programming Language :: Python :: 3.0",
@@ -21,14 +20,6 @@ CLASSIFIERS = frozenset(("Programming Language :: Python :: 3",
                          "Programming Language :: Python :: 3.2",
                          "Programming Language :: Python :: 3.3",
                          ))
-
-AUTH = OAuth(os.environ['OAUTH_TOKEN'],
-             os.environ['OAUTH_SECRET'],
-             os.environ['CONSUMER_KEY'],
-             os.environ['CONSUMER_SECRET'],
-             )
-
-twitter = Twitter(auth=AUTH)
 
 
 def count_chars_of_tweet(tweet):
@@ -83,6 +74,12 @@ def post_to_twitter(projectname, meta, msgtype):
     finalmessage = " ".join(message)
 
     # All done!
+    AUTH = OAuth(os.environ['OAUTH_TOKEN'],
+                 os.environ['OAUTH_SECRET'],
+                 os.environ['CONSUMER_KEY'],
+                 os.environ['CONSUMER_SECRET'],
+                 )
+    twitter = Twitter(auth=AUTH)
     twitter.statuses.update(status=finalmessage)
 
 def check_for_updates(supported, classifiers, interval, service):
