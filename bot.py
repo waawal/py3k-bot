@@ -145,5 +145,6 @@ if __name__ == '__main__':
         beginprocessing = time()
         check_for_updates()
         endprocessing = time()
-        sleep(QUERY_INTERVAL - (endprocessing - beginprocessing)) # Consider processing time.
+        processingtime = endprocessing - beginprocessing
+        sleep(QUERY_INTERVAL - processingtime) # Consider processing time.
 
