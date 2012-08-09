@@ -89,27 +89,32 @@ def post_to_twitter(projectname, meta, msgtype):
     print "Posting to twitter: ", finalmessage, "length: ", len(finalmessage)
     twitter.statuses.update(status=finalmessage)
 
-def check_for_updates():
+def check_for_updates(supported, interval):
     """ Checks for new projects and updates.
     """
+    startprocessing = time() # Let's do this!
     client = xmlrpclib.ServerProxy(PYPI_SERVICE)
-    updates = client.changelog(int(time() - QUERY_INTERVAL))
-    # Returns a list of ['vimeo', '0.1.2', 1344087619,
-    #                    'update description, _pypi_hidden, classifiers']
+    updates = client.changelog(startprocessing - interval)
+    # Returns a list of:
+    #['vimeo', '0.1.2', 1344087619,'update description, classifiers']
     
-    if updates: print updates # Log to heroku.
+    if updates:
+        print updates # Log to heroku.
 
-    for module in updates:
-        name, version, timestamp, actions = module
-        if 'create' in actions:
-            sleep(3) # Sleep 3 secs awaiting json-representation.
-            try:
-                meta = get_meta(name)
-            except TypeError:
-                meta = {}
-            if CLASSIFIERS.intersection(meta.get('classifiers')):
-                supported.add(name)
-                post_to_twitter(name, meta, 'new')
+        for module in updates:
+            name, version, timestamp, actions = module
+            if 'create' in actions:
+                sleep(3) # Sleep 3 secs awaiting json-representation.
+                try:
+                    meta = get_meta(name)
+                except TypeError:
+                    meta = {}
+                if CLASSIFIERS.intersection(meta.get('classifiers')):
+                    supported.add(name)
+                    post_to_twitter(name, meta, 'new')
+    endprocessing = time()
+    processingtime = endprocessing - startprocessing
+    return processingtime
 
     for module in updates: # Must iterate 2 times, updates can come before new.
         name, version, timestamp, actions = module
@@ -142,9 +147,6 @@ if __name__ == '__main__':
     supported = get_supported(CLASSIFIERS)
     sleep(QUERY_INTERVAL)
     while True:
-        beginprocessing = time()
-        check_for_updates()
-        endprocessing = time()
-        processingtime = endprocessing - beginprocessing
+        processingtime = check_for_updates(supported, QUERY_INTERVAL)
         sleep(QUERY_INTERVAL - processingtime) # Consider processing time.
 
