@@ -44,7 +44,7 @@ def count_tweet(tweet):
     """
     chars = len(tweet) # we initially append the future space-chars.
     for part in tweet:
-        if part.startswith("http://"):
+        if part.startswith("http://") or part.startswith("https://"):
             chars += 21 # t.co-urls are at most 21
         else:
             chars += len(part)
