@@ -39,10 +39,10 @@ def get_meta(project, timeout=TIMEOUT):
                         timeout=timeout)
     return meta.json['info']
 
-def count_tweet(tweet):
+def count_chars_of_tweet(tweet):
     """ Counts the characters within a tweet.
     """
-    chars = len(tweet) # we initially append the future space-chars.
+    chars = len(tweet) # we initially append the future spaces between words
     for part in tweet:
         if part.startswith("http://", "https://"):
             chars += 21 # t.co-urls are at most 21
@@ -53,20 +53,23 @@ def count_tweet(tweet):
 def post_to_twitter(projectname, meta, msgtype):
     """ Composes a twitter-post and sends it on its way.
     """
+    DIVIDER = "-"
     message = []
 
     msgtype = '[{0}]'.format(msgtype.upper())
     message.append(msgtype)
 
-    message.append(projectname + " -")
+    message.append(projectname)
+    message.append(DIVIDER)
 
     message.append('pypi:')
     message.append('http://pypi.python.org/pypi/{0}/'.format(projectname))
 
     # If a home-page is provided, lets use it, otherwise - fall back to crate.
-    if meta.get('home_page') and not meta.get('home_page') == "UNKNOWN":
+    homepage = meta.get('home_page', 'UNKNOWN')
+    if not homepage == "UNKNOWN":
         message.append('www:')
-        message.append(meta['home_page'])
+        message.append(homepage)
     else:
         message.append('crate.io:')
         message.append('https://crate.io/packages/{0}/'.format(projectname))
@@ -75,18 +78,19 @@ def post_to_twitter(projectname, meta, msgtype):
     message.append('#python')
 
     # Building the summary.
-    chrsleft = 140 - (count_tweet(message) + 1) # +1 = the space before summary.
+    currentchars = count_chars_of_tweet(message)
+    chrsleft = 140 - (currentchars + 1) # +1 = the space before summary.
     
-    if meta.get('summary', 'UNKNOWN') != "UNKNOWN":
-        if len(meta['summary']) > chrsleft:
-            message.insert(2, "".join((meta['summary'][:(chrsleft-3)], '...')))
+    summary = meta.get('summary', 'UNKNOWN')
+    if not summary == "UNKNOWN":
+        if len(summary) > chrsleft:
+            message.insert(2, "".join((summary[:(chrsleft-3)], '...'))) # Trunc.
         else:
-            message.insert(2, meta['summary'])
+            message.insert(2, summary)
     
     finalmessage = " ".join(message)
 
     # All done!
-    print "Posting to twitter: ", finalmessage, "length: ", len(finalmessage)
     twitter.statuses.update(status=finalmessage)
 
 def check_for_updates(supported, interval):
