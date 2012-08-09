@@ -1,5 +1,5 @@
 """ Message-bot running on heroku, tweets all new packages that supports py3k
-    (checks for updates on old <3k packages also)
+    (checks for updates of old <3k packages also)
 """
 
 
@@ -13,7 +13,6 @@ from twitter import OAuth, Twitter
 
 QUERY_INTERVAL = 2 * 60 # In seconds, intervals between queries to PYPI, 2 min.
 PYPI_SERVICE = 'http://pypi.python.org/pypi'
-
 CLASSIFIERS = frozenset(("Programming Language :: Python :: 3",
                          "Programming Language :: Python :: 3.0",
                          "Programming Language :: Python :: 3.1",
@@ -102,14 +101,14 @@ def check_for_updates(supported, classifiers, interval, service):
                     supported.add(name)
                     post_to_twitter(name, meta, 'new')
 
-    for module in updates: # Must iterate 2 times, updates can come before new.
-        name, version, timestamp, actions = module
-        if 'new release' in actions or 'classifiers' in actions:
-            if name not in supported:
-                meta = client.release_data(name, version)
-                if classifiers.intersection(meta.get('classifiers')):
-                    supported.add(name)
-                    post_to_twitter(name, meta, 'update')
+        for module in updates: # Updates can come before new.
+            name, version, timestamp, actions = module
+            if 'new release' in actions or 'classifiers' in actions:
+                if name not in supported:
+                    meta = client.release_data(name, version)
+                    if classifiers.intersection(meta.get('classifiers')):
+                        supported.add(name)
+                        post_to_twitter(name, meta, 'update')
 
     endprocessing = time()
     processingtime = endprocessing - startprocessing
@@ -123,8 +122,7 @@ def get_supported(classifiers, service):
     multicall = xmlrpclib.MultiCall(client)
     [multicall.browse([classifier]) for classifier in classifiers]
     supported = set()
-    for results in multicall():
-        # Returns a list of ['projectname', 'version']
+    for results in multicall(): # Returns a list of ['projectname', 'version']
         supported = supported.union([result[0] for result in results])
     return supported
 
