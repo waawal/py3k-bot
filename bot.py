@@ -8,7 +8,6 @@ import xmlrpclib
 from time import time, sleep
 from datetime import datetime
 
-import requests
 from twitter import OAuth, Twitter
 
 
@@ -31,13 +30,6 @@ AUTH = OAuth(os.environ['OAUTH_TOKEN'],
 
 twitter = Twitter(auth=AUTH)
 
-
-def get_meta(project, timeout=TIMEOUT):
-    """ Gets the projects json-representation from PYPI.
-    """
-    meta = requests.get('http://pypi.python.org/pypi/{0}/json'.format(project),
-                        timeout=timeout)
-    return meta.json['info']
 
 def count_chars_of_tweet(tweet):
     """ Counts the characters within a tweet.
@@ -93,7 +85,7 @@ def post_to_twitter(projectname, meta, msgtype):
     # All done!
     twitter.statuses.update(status=finalmessage)
 
-def check_for_updates(supported, interval, service):
+def check_for_updates(supported, classifiers, interval, service):
     """ Checks for new projects and updates.
     """
     startprocessing = time() # Let's do this!
@@ -108,12 +100,8 @@ def check_for_updates(supported, interval, service):
         for module in updates:
             name, version, timestamp, actions = module
             if 'create' in actions:
-                sleep(3) # Sleep 3 secs awaiting json-representation.
-                try:
-                    meta = get_meta(name)
-                except TypeError:
-                    meta = {}
-                if CLASSIFIERS.intersection(meta.get('classifiers')):
+                meta = client.release_data(name, version)
+                if classifiers.intersection(meta.get('classifiers')):
                     supported.add(name)
                     post_to_twitter(name, meta, 'new')
 
@@ -121,11 +109,8 @@ def check_for_updates(supported, interval, service):
         name, version, timestamp, actions = module
         if 'new release' in actions or 'classifiers' in actions:
             if name not in supported:
-                try:
-                    meta = get_meta(name)
-                except TypeError:
-                    meta = {}
-                if CLASSIFIERS.intersection(meta.get('classifiers')):
+                meta = client.release_data(name, version)
+                if classifiers.intersection(meta.get('classifiers')):
                     supported.add(name)
                     post_to_twitter(name, meta, 'update')
 
@@ -148,10 +133,11 @@ def get_supported(classifiers, service):
 
 
 if __name__ == '__main__':
-    supported = get_supported(CLASSIFIERS, service=PYPI_SERVICE)
+    supported = get_supported(classifiers=CLASSIFIERS, service=PYPI_SERVICE)
     sleep(QUERY_INTERVAL)
     while True:
         processingtime = check_for_updates(supported=supported,
+                                           classifiers=CLASSIFIERS,
                                            interval=QUERY_INTERVAL,
                                            service=PYPI_SERVICE,
                                            )
