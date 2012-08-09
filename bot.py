@@ -1,6 +1,6 @@
-''' Message-bot running on heroku, tweets all new packages that supports py3k
+""" Message-bot running on heroku, tweets all new packages that supports py3k
     (checks for updates of old <3k packages also)
-'''
+"""
 
 
 import os
@@ -22,8 +22,8 @@ CLASSIFIERS = frozenset(('Programming Language :: Python :: 3',
 
 
 def count_chars_of_tweet(tweet):
-    ''' Counts the characters within a tweet.
-    '''
+    """ Counts the characters within a tweet.
+    """
     chars = len(tweet) # we initially append the future spaces between words
     for part in tweet:
         if part.startswith('http://', 'https://'):
@@ -33,8 +33,8 @@ def count_chars_of_tweet(tweet):
     return chars
 
 def post_to_twitter(projectname, meta, msgtype):
-    ''' Composes a twitter-post and sends it on its way.
-    '''
+    """ Composes a twitter-post and sends it on its way.
+    """
     DIVIDER = '-'
     message = []
 
@@ -82,8 +82,8 @@ def post_to_twitter(projectname, meta, msgtype):
     twitter.statuses.update(status=finalmessage)
 
 def check_for_updates(supported, classifiers, interval, service):
-    ''' Checks for new projects and updates.
-    '''
+    """ Checks for new projects and updates.
+    """
     startprocessing = time() # Let's do this!
     client = xmlrpclib.ServerProxy(service)
     since = int(startprocessing - interval)
@@ -116,9 +116,9 @@ def check_for_updates(supported, classifiers, interval, service):
     return processingtime
 
 def get_supported(classifiers, service):
-    ''' Builds a set of the PYPI-projects currently listed under the provided
+    """ Builds a set of the PYPI-projects currently listed under the provided
         classifiers.
-    '''
+    """
     client = xmlrpclib.ServerProxy(service)
     multicall = xmlrpclib.MultiCall(client)
     [multicall.browse([classifier]) for classifier in classifiers]
