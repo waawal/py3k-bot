@@ -136,6 +136,7 @@ def get_supported(classifiers):
 
 if __name__ == '__main__':
     supported = get_supported(CLASSIFIERS)
+    sleep(QUERY_INTERVAL)
     while True:
         beginprocessing = time()
         check_for_updates()
