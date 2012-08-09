@@ -116,9 +116,6 @@ def check_for_updates(supported, interval):
                 if CLASSIFIERS.intersection(meta.get('classifiers')):
                     supported.add(name)
                     post_to_twitter(name, meta, 'new')
-    endprocessing = time()
-    processingtime = endprocessing - startprocessing
-    return processingtime
 
     for module in updates: # Must iterate 2 times, updates can come before new.
         name, version, timestamp, actions = module
@@ -132,6 +129,9 @@ def check_for_updates(supported, interval):
                     supported.add(name)
                     post_to_twitter(name, meta, 'update')
 
+    endprocessing = time()
+    processingtime = endprocessing - startprocessing
+    return processingtime
 
 def get_supported(classifiers):
     """ Builds a set of the PYPI-projects currently listed under the provided
