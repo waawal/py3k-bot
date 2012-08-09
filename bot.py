@@ -21,15 +21,15 @@ CLASSIFIERS = frozenset(("Programming Language :: Python :: 3",
                          "Programming Language :: Python :: 3.1",
                          "Programming Language :: Python :: 3.2",
                          "Programming Language :: Python :: 3.3",
-#                        "Programming Language :: Python :: 3.4",
                          ))
 
+AUTH = OAuth(os.environ['OAUTH_TOKEN'],
+             os.environ['OAUTH_SECRET'],
+             os.environ['CONSUMER_KEY'],
+             os.environ['CONSUMER_SECRET'],
+             )
 
-twitter = Twitter(auth=OAuth(os.environ['OAUTH_TOKEN'],
-                             os.environ['OAUTH_SECRET'],
-                             os.environ['CONSUMER_KEY'],
-                             os.environ['CONSUMER_SECRET'],
-                             ))
+twitter = Twitter(auth=AUTH)
 
 
 def get_meta(project, timeout=TIMEOUT):
