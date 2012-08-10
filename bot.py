@@ -71,7 +71,7 @@ def post_to_twitter(projectname, meta):
 def get_meta(name, version, client):
     try:
         meta = client.release_data(name, version)
-    except TypeError: # Sometimes None is returned as the version.
+    except TypeError: # Sometimes None is returned from PYPI as the version.
         version = client.package_releases(name)[0]
         meta = client.release_data(name, version)
         return meta
@@ -84,7 +84,7 @@ def check_for_updates(supported, classifiers, interval, service):
     client = xmlrpclib.ServerProxy(service)
     since = int(startprocessing - interval)
     updates = client.changelog(since)
-    #[['vimeo', '0.1.2', 1344087619,'update description, classifiers'], ...]]
+    # [['vimeo', '0.1.2', 1344087619,'update description, classifiers'], ...]]
     
     if updates:
         print updates # Log to heroku.
