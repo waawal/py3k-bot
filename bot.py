@@ -97,7 +97,11 @@ def check_for_updates(supported, classifiers, interval, service):
         for module in updates:
             name, version, timestamp, actions = module
             if 'create' in actions:
-                meta = client.release_data(name, version)
+                try:
+                    meta = client.release_data(name, version)
+                except TypeError: # Sometimes None is returned as the version.
+                    version = client.package_releases(name)[0]
+                    meta = client.release_data(name, version)
                 if classifiers.intersection(meta.get('classifiers')):
                     supported.add(name)
                     post_to_twitter(name, meta, 'new')
@@ -106,7 +110,11 @@ def check_for_updates(supported, classifiers, interval, service):
             name, version, timestamp, actions = module
             if 'new release' in actions or 'classifiers' in actions:
                 if name not in supported:
-                    meta = client.release_data(name, version)
+                    try:
+                        meta = client.release_data(name, version)
+                    except TypeError: # Sometimes None is returned as the version.
+                        version = client.package_releases(name)[0]
+                        meta = client.release_data(name, version)
                     if classifiers.intersection(meta.get('classifiers')):
                         supported.add(name)
                         post_to_twitter(name, meta, 'update')
