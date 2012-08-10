@@ -67,7 +67,7 @@ def post_to_twitter(projectname, meta, auth=TWITTER_AUTH):
     finalmessage = " ".join(message)
 
     # All done!
-    twitter = Twitter(auth=OAuth(auth))
+    twitter = Twitter(auth=OAuth(**auth))
     twitter.statuses.update(status=finalmessage)
 
 def get_meta(name, version, client):
