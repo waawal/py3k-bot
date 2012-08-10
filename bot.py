@@ -32,14 +32,11 @@ def count_chars_of_tweet(tweet):
             chars += len(part)
     return chars
 
-def post_to_twitter(projectname, meta, msgtype):
+def post_to_twitter(projectname, meta):
     """ Composes a twitter-post and sends it on its way.
     """
     DIVIDER = '-'
     message = []
-
-    msgtype = "[{0}]".format(msgtype.upper())
-    message.append(msgtype)
 
     message.append(projectname)
     message.append(DIVIDER)
@@ -104,7 +101,7 @@ def check_for_updates(supported, classifiers, interval, service):
                     meta = client.release_data(name, version)
                 if classifiers.intersection(meta.get('classifiers')):
                     supported.add(name)
-                    post_to_twitter(name, meta, 'new')
+                    post_to_twitter(name, meta)
 
         for module in updates: # Updates can come before new.
             name, version, timestamp, actions = module
@@ -117,7 +114,7 @@ def check_for_updates(supported, classifiers, interval, service):
                         meta = client.release_data(name, version)
                     if classifiers.intersection(meta.get('classifiers')):
                         supported.add(name)
-                        post_to_twitter(name, meta, 'update')
+                        post_to_twitter(name, meta)
 
     endprocessing = time()
     processingtime = endprocessing - startprocessing
