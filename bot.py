@@ -37,30 +37,23 @@ def post_to_twitter(projectname, meta):
     """ Composes a twitter-post and sends it on its way.
     """
     DIVIDER = '-'
-    message = []
-
-    message.append(projectname)
-    message.append(DIVIDER)
-
-    message.append('pypi:')
-    message.append("http://pypi.python.org/pypi/{0}/".format(projectname))
-
+    
     # If a home-page is provided, lets use it, otherwise - fall back to crate.
     homepage = meta.get('home_page', 'UNKNOWN')
-    if not homepage == 'UNKNOWN':
-        message.append('www:')
-        message.append(homepage)
-    else:
-        message.append('crate.io:')
-        message.append("https://crate.io/packages/{0}/".format(projectname))
+    if homepage == 'UNKNOWN':
+        homepage = "https://crate.io/packages/{0}/".format(projectname)
 
-    # Important, add #python
-    message.append('#python')
-
+    message = [projectname,
+               DIVIDER,
+               'pypi:',
+               "http://pypi.python.org/pypi/{0}/".format(projectname),
+               'www:',
+               homepage,
+               '#python',
+               ]
     # Building the summary.
     currentchars = count_chars_of_tweet(message)
     chrsleft = 140 - (currentchars + 1) # +1 = the space before summary.
-    
     summary = meta.get('summary', 'UNKNOWN')
     if not summary == 'UNKNOWN':
         if len(summary) > chrsleft:
