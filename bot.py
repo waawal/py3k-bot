@@ -76,7 +76,7 @@ def get_meta(name, version, client):
     except TypeError: # Sometimes None is returned from PYPI as the version.
         version = client.package_releases(name)[0]
         meta = client.release_data(name, version)
-        return meta
+    return meta
 
 def check_for_updates(supported, classifiers=CLASSIFIERS,
                       interval=QUERY_INTERVAL, service=PYPI_SERVICE):
