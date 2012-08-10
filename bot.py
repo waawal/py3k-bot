@@ -42,18 +42,18 @@ def post_to_twitter(projectname, meta):
     homepage = meta.get('home_page', 'UNKNOWN')
     if homepage == 'UNKNOWN':
         homepage = "https://crate.io/packages/{0}/".format(projectname)
-
+    # Let's start building the message!
     message = [projectname,
                DIVIDER,
                'pypi:', "http://pypi.python.org/pypi/{0}/".format(projectname),
                'www:', homepage,
                '#python',
                ]
-    # Building the summary.
-    currentchars = count_chars_of_tweet(message)
-    chrsleft = 140 - (currentchars + 1) # +1 = the space before summary.
+    # Inserting the summary if there is one.
     summary = meta.get('summary', 'UNKNOWN')
     if not summary == 'UNKNOWN':
+        currentchars = count_chars_of_tweet(message)
+        chrsleft = 140 - (currentchars + 1) # +1 = the space before summary.
         if len(summary) > chrsleft:
             message.insert(2, "".join((summary[:(chrsleft-3)], '...'))) # Trunc.
         else:
