@@ -5,6 +5,7 @@
 
 import os
 import xmlrpclib
+from collections import deque
 from time import time, sleep
 from datetime import datetime
 
@@ -78,43 +79,42 @@ def post_to_twitter(projectname, meta):
     twitter = Twitter(auth=AUTH)
     twitter.statuses.update(status=finalmessage)
 
+def get_meta(name, version, client):
+    try:
+        meta = client.release_data(name, version)
+    except TypeError: # Sometimes None is returned as the version.
+        version = client.package_releases(name)[0]
+        meta = client.release_data(name, version)
+        return meta
+
 def check_for_updates(supported, classifiers, interval, service):
     """ Checks for new projects and updates.
+        Returns the overall processingtime in seconds.
     """
     startprocessing = time() # Let's do this!
     client = xmlrpclib.ServerProxy(service)
     since = int(startprocessing - interval)
     updates = client.changelog(since)
-    # Returns a list of:
-    #['vimeo', '0.1.2', 1344087619,'update description, classifiers']
+    #[['vimeo', '0.1.2', 1344087619,'update description, classifiers'], ...]]
     
     if updates:
         print updates # Log to heroku.
+        queue = collections.deque() # Since actions can share timestamp.
 
         for module in updates:
             name, version, timestamp, actions = module
-            if 'create' in actions:
-                try:
-                    meta = client.release_data(name, version)
-                except TypeError: # Sometimes None is returned as the version.
-                    version = client.package_releases(name)[0]
-                    meta = client.release_data(name, version)
-                if classifiers.intersection(meta.get('classifiers')):
-                    supported.add(name)
-                    post_to_twitter(name, meta)
+            if name not in supported:
+                if 'create' in actions:
+                    queue.appendleft((name, version))
+                elif 'new release' in actions or 'classifiers' in actions:
+                    queue.append((name, version))
 
-        for module in updates: # Updates can come before new.
-            name, version, timestamp, actions = module
-            if 'new release' in actions or 'classifiers' in actions:
-                if name not in supported:
-                    try:
-                        meta = client.release_data(name, version)
-                    except TypeError: # Sometimes None is returned as the version.
-                        version = client.package_releases(name)[0]
-                        meta = client.release_data(name, version)
-                    if classifiers.intersection(meta.get('classifiers')):
-                        supported.add(name)
-                        post_to_twitter(name, meta)
+        for updated in queue: # Updates can come before new.
+            name, version = updated
+            meta = get_meta(name, version, client)
+            if classifiers.intersection(meta.get('classifiers')):
+                supported.add(name)
+                post_to_twitter(name, meta)
 
     endprocessing = time()
     processingtime = endprocessing - startprocessing
