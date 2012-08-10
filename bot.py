@@ -14,6 +14,11 @@ from twitter import OAuth, Twitter
 
 QUERY_INTERVAL = 2 * 60 # In seconds, intervals between queries to PYPI, 2 min.
 PYPI_SERVICE = 'http://pypi.python.org/pypi'
+TWITTER_AUTH = {'token': os.environ['OAUTH_TOKEN'],
+                'token_secret': os.environ['OAUTH_SECRET'],
+                'consumer_key': os.environ['CONSUMER_KEY'],
+                'consumer_secret': os.environ['CONSUMER_SECRET'],
+                }
 CLASSIFIERS = frozenset(('Programming Language :: Python :: 3',
                          'Programming Language :: Python :: 3.0',
                          'Programming Language :: Python :: 3.1',
@@ -33,7 +38,7 @@ def count_chars_of_tweet(tweet):
             chars += len(part)
     return chars
 
-def post_to_twitter(projectname, meta):
+def post_to_twitter(projectname, meta, auth=TWITTER_AUTH):
     """ Composes a twitter-post and sends it on its way.
     """
     DIVIDER = '-'
@@ -62,10 +67,7 @@ def post_to_twitter(projectname, meta):
     finalmessage = " ".join(message)
 
     # All done!
-    AUTH = OAuth(os.environ['OAUTH_TOKEN'], os.environ['OAUTH_SECRET'],
-                 os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'],
-                 )
-    twitter = Twitter(auth=AUTH)
+    twitter = Twitter(auth=OAuth(auth))
     twitter.statuses.update(status=finalmessage)
 
 def get_meta(name, version, client):
@@ -76,7 +78,8 @@ def get_meta(name, version, client):
         meta = client.release_data(name, version)
         return meta
 
-def check_for_updates(supported, classifiers, interval, service):
+def check_for_updates(supported, classifiers=CLASSIFIERS,
+                      interval=QUERY_INTERVAL, service=PYPI_SERVICE):
     """ Checks for new projects and updates.
         Returns the overall processingtime in seconds.
     """
@@ -88,7 +91,7 @@ def check_for_updates(supported, classifiers, interval, service):
     
     if updates:
         print updates # Log to heroku.
-        queue = collections.deque() # Since actions can share timestamp.
+        queue = deque() # Since actions can share timestamp.
 
         for module in updates:
             name, version, timestamp, actions = module
@@ -109,7 +112,7 @@ def check_for_updates(supported, classifiers, interval, service):
     processingtime = endprocessing - startprocessing
     return processingtime
 
-def get_supported(classifiers, service):
+def get_supported(classifiers=CLASSIFIERS, service=PYPI_SERVICE):
     """ Builds a set of the PYPI-projects currently listed under the provided
         classifiers.
     """
@@ -123,13 +126,9 @@ def get_supported(classifiers, service):
 
 
 if __name__ == '__main__':
-    supported = get_supported(CLASSIFIERS, PYPI_SERVICE)
+    supported = get_supported()
     sleep(QUERY_INTERVAL)
     while True:
-        processingtime = check_for_updates(supported=supported,
-                                           classifiers=CLASSIFIERS,
-                                           interval=QUERY_INTERVAL,
-                                           service=PYPI_SERVICE,
-                                           )
+        processingtime = check_for_updates(supported)
         sleep(QUERY_INTERVAL - processingtime) # Consider processing time.
 
