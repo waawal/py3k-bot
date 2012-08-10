@@ -45,10 +45,8 @@ def post_to_twitter(projectname, meta):
 
     message = [projectname,
                DIVIDER,
-               'pypi:',
-               "http://pypi.python.org/pypi/{0}/".format(projectname),
-               'www:',
-               homepage,
+               'pypi:', "http://pypi.python.org/pypi/{0}/".format(projectname),
+               'www:', homepage,
                '#python',
                ]
     # Building the summary.
@@ -64,10 +62,8 @@ def post_to_twitter(projectname, meta):
     finalmessage = " ".join(message)
 
     # All done!
-    AUTH = OAuth(os.environ['OAUTH_TOKEN'],
-                 os.environ['OAUTH_SECRET'],
-                 os.environ['CONSUMER_KEY'],
-                 os.environ['CONSUMER_SECRET'],
+    AUTH = OAuth(os.environ['OAUTH_TOKEN'], os.environ['OAUTH_SECRET'],
+                 os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'],
                  )
     twitter = Twitter(auth=AUTH)
     twitter.statuses.update(status=finalmessage)
